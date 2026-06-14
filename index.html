@@ -203,9 +203,22 @@
 </div>
 
 <script>
-  const SUPA_URL = "https://rbbqncedmwlvixeewins.supabase.co";
-  const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiYnFuY2VkbXdsdml4ZWV3aW5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjY5NzUsImV4cCI6MjA5NDU0Mjk3NX0.RmfrVUinUK4sGuAZGNF5s6IvWNu24EGRowDzUWUNPqs";
-  const ADMIN_PASS = "GESA2026admin";   // ← change this to your own password
+  const NEON_CONN = "postgresql://neondb_owner:npg_tsS6AdRYHC2Z@ep-lucky-bar-atbl9w3x-pooler.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require";
+  const ADMIN_PASS = "GESA2026admin";
+
+  async function neonQuery(sql, params = []) {
+    const res = await fetch("https://ep-lucky-bar-atbl9w3x-pooler.c-9.us-east-1.aws.neon.tech/sql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer npg_tsS6AdRYHC2Z",
+        "Neon-Connection-String": NEON_CONN
+      },
+      body: JSON.stringify({ query: sql, params })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  }
 
   let allData = [];
   let currentFilter = "all";
@@ -233,10 +246,8 @@
   /* ── Fetch data ── */
   async function loadData() {
     try {
-      const res = await fetch(SUPA_URL + "/rest/v1/registrations?select=*&order=submitted_at.desc", {
-        headers: { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY }
-      });
-      allData = await res.json();
+      const data = await neonQuery("SELECT * FROM registrations ORDER BY submitted_at DESC");
+      allData = data.rows || [];
       updateStats();
       renderTable();
       document.getElementById("tableLoader").style.display = "none";
