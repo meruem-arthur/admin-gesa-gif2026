@@ -207,15 +207,7 @@
   const ADMIN_PASS = "GESA2026admin";
 
   async function neonQuery(sql, params = []) {
-    const res = await fetch("https://ep-lucky-bar-atbl9w3x-pooler.c-9.us-east-1.aws.neon.tech/sql/query", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer npg_tsS6AdRYHC2Z",
-        "Neon-Connection-String": NEON_CONN
-      },
-      body: JSON.stringify({ query: sql, params })
-    });
+    const res = await fetch("/.netlify/functions/getRegistrations");
     if (!res.ok) throw new Error(await res.text());
     return res.json();
   }
